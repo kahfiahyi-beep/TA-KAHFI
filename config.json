@@ -1,0 +1,30 @@
+{
+  "periode_penelitian": {
+    "tanggal_mulai": "2026-01-01",
+    "tanggal_selesai": "2026-06-30",
+    "deskripsi": "Periode observasi penelitian skripsi (Januari 2026 s/d Juni 2026)"
+  },
+  "target_penelitian": {
+    "target_sampel_valid": 3000,
+    "deskripsi": "Target 3.000 postingan Instagram UMKM yang valid dan unik sesuai kriteria inklusi"
+  },
+  "pengaturan_scraping": {
+    "delay_detik_min": 3,
+    "delay_detik_max": 7,
+    "max_posts_per_account": 100,
+    "simpan_gambar_lokal": true,
+    "folder_gambar": "dataset_images",
+    "timeout_detik": 15
+  },
+  "database": {
+    "db_file": "dataset_skripsi.db"
+  },
+  "ekspor": {
+    "folder_output": "hasil_ekspor",
+    "file_mentah": "dataset_mentah.xlsx",
+    "file_layak": "dataset_layak.xlsx",
+    "file_eksklusi": "dataset_eksklusi.xlsx",
+    "file_layak_csv": "dataset_layak.csv",
+    "file_laporan_ringkasan": "laporan_ringkasan_seleksi.xlsx"
+  }
+}
