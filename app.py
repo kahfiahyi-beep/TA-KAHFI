@@ -14,6 +14,7 @@ import statistics_module as sm
 import url_fetcher as uf
 import ocr_engine as ocr
 import sampling_criteria as sc
+import shopee_reviews_manager as srm
 import json
 from datetime import datetime, date
 
@@ -535,7 +536,18 @@ with tab_identify:
         st.markdown("#### Detail Informasi Postingan")
         if st.session_state.get("in_umkm") and st.session_state.get("in_umkm") != "UMKM Unggulan":
             st.caption("✨ *Nama Brand, Judul, dan Caption terisi otomatis dari analisis gambar (dapat disunting bebas).*")
-        in_umkm = st.text_input("Nama Brand / UMKM:", value=st.session_state.get("in_umkm", "UMKM Unggulan"))
+        c_brand1, c_brand2 = st.columns([1.6, 1.0])
+        with c_brand1:
+            in_umkm = st.text_input("Nama Brand / UMKM:", value=st.session_state.get("in_umkm", "UMKM Unggulan"))
+        with c_brand2:
+            sel_plat_idx = 1 if st.session_state.get("in_platform") == "Shopee" else 0
+            in_platform_choice = st.selectbox(
+                "Platform:",
+                ["Instagram", "Shopee"],
+                index=sel_plat_idx,
+                help="Pilih platform sumber data. Memilih Shopee akan mengaktifkan modul Metrik Engagement Shopee dan Ulasan Pembeli Shopee."
+            )
+            st.session_state["in_platform"] = in_platform_choice
         in_title = st.text_input("Judul / Keterangan Postingan:", value=st.session_state.get("in_title", "Postingan Produk"))
         in_caption = st.text_area("Teks Caption Postingan:", value=st.session_state.get("in_caption", ""), height=110, help="Teks yang tertera pada caption postingan")
         
@@ -607,6 +619,22 @@ with tab_identify:
             else:
                 in_rating = float(st.session_state.get("in_rating", 0.0))
             
+        # ── MODUL ULASAN DAN KOMENTAR PEMBELI SHOPEE ──
+        if is_shopee:
+            srm.render_shopee_reviews_section(
+                current_comments=in_com,
+                current_rating=in_rating,
+                product_title=in_title
+            )
+        else:
+            with st.expander("🛍️ Buka Modul Ulasan Pembeli Shopee (Klik untuk Kelola Data Ulasan)", expanded=False):
+                srm.render_shopee_reviews_section(
+                    current_comments=in_com,
+                    current_rating=in_rating,
+                    product_title=in_title
+                )
+
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
         btn_analyze = st.button("🚀 Jalankan Identifikasi Computer Vision (K1–K8)", type="primary", use_container_width=True)
 
     with col_result:

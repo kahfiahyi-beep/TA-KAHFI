@@ -7,13 +7,14 @@ import pandas as pd
 DB_PATH = os.path.join(os.path.dirname(__file__), "ta_umkm_vision.db")
 
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL;")
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,8 +88,31 @@ def init_db():
     )
     """)
     conn.commit()
-    
-    # Migrasi kolom F1 - F8 dan total_visible_engagement jika tabel sudah pernah dibuat sebelumnya
+
+    # Inisialisasi tabel Ulasan Pembeli Shopee (shopee_reviews)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS shopee_reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER DEFAULT NULL,
+        product_name TEXT DEFAULT '',
+        review_id TEXT DEFAULT '',
+        reviewer_name TEXT NOT NULL,
+        review_date TEXT NOT NULL,
+        rating INTEGER NOT NULL,
+        review_text TEXT NOT NULL,
+        product_variant TEXT DEFAULT '',
+        verified_purchase INTEGER DEFAULT 1,
+        source TEXT DEFAULT 'Input Manual',
+        sentiment_auto TEXT DEFAULT 'Netral',
+        sentiment TEXT DEFAULT 'Netral',
+        notes TEXT DEFAULT '',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_shopee_rev_rating ON shopee_reviews(rating);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_shopee_rev_sentiment ON shopee_reviews(sentiment);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_shopee_rev_date ON shopee_reviews(review_date);")
+    conn.commit()
     cursor.execute("PRAGMA table_info(posts)")
     existing_cols = [row[1] for row in cursor.fetchall()]
     
